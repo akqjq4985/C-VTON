@@ -17,6 +17,7 @@ from bpgm.model.models import BPGM
 from bpgm.model.utils import load_checkpoint, save_checkpoint
 from bpgm.utils.args import get_opt
 from bpgm.utils.dataset import DataLoader, MPVDataset, VitonDataset
+import pdb
 
 if __name__ == "__main__":
     
@@ -41,15 +42,13 @@ if __name__ == "__main__":
     else:
         raise NotImplementedError
     
-    model.cuda()
+    # model.cuda()
     model.eval()
 
     for i in range(len(dataset.filepath_df)):
         images = dataset[i]
         images_swap = dataset[i]
         
-        if images['im_name'] != "013418_0.jpg":
-            continue
         
         # images = dataset[309]
         # images_swap = dataset[134]
@@ -66,64 +65,67 @@ if __name__ == "__main__":
                 im = Image.fromarray(im)
                 # im.save(os.path.join("sample", "bpgm_warp", key + ".png"))
 
-        # DEAL WITH ORIGINAL
-        tc = images['target_cloth'].unsqueeze(0).cuda()
-        tcm = images['target_cloth_mask'].unsqueeze(0).cuda()
-        im_bm = images['body_mask'].unsqueeze(0).cuda()
-        im_label = images['body_label'].unsqueeze(0).cuda()
-        # agnostic = images['agnostic'].unsqueeze(0).cuda()
+        with torch.no_grad():
+            # DEAL WITH ORIGINAL
+            tc = images['target_cloth'].unsqueeze(0)
+            tcm = images['target_cloth_mask'].unsqueeze(0)
+            im_bm = images['body_mask'].unsqueeze(0)
+            im_label = images['body_label'].unsqueeze(0)
+            # agnostic = images['agnostic'].unsqueeze(0).cuda()
+                
+            grid = model(im_label, tc)
+            # grid = model(agnostic, tc)
             
-        grid = model(im_label, tc)
-        # grid = model(agnostic, tc)
-        
-        warped_cloth = F.grid_sample(tc, grid, padding_mode='border', align_corners=True)
-        
-        warped_cloth_masked = warped_cloth * im_bm
-        warped_mask = F.grid_sample(tcm, grid, padding_mode='border', align_corners=True)
-        
-        warped_cloth = warped_cloth.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
-        warped_cloth = (warped_cloth * 255).astype(np.uint8)
-        
-        warped_cloth_masked = warped_cloth_masked.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
-        warped_cloth_masked = (warped_cloth_masked * 255).astype(np.uint8)
-        
-        warped_mask = warped_mask.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
-        warped_mask = np.repeat(warped_mask, 3, axis=-1)
-        warped_mask = (warped_mask * 255).astype(np.uint8)
-        
-        # im = Image.fromarray(warped_cloth).save(os.path.join("sample", "bpgm_warp", "warped_cloth.png"))
-        # im = Image.fromarray(warped_cloth_masked).save(os.path.join("sample", "bpgm_warp", "warped_cloth_masked.png"))
-        # im = Image.fromarray(warped_mask).save(os.path.join("sample", "bpgm_warp", "warped_mask.png"))
-        
-        # DEAL WITH SWAP
-        tc = images_swap['target_cloth'].unsqueeze(0).cuda()
-        tcm = images_swap['target_cloth_mask'].unsqueeze(0).cuda()
-        im_bm = images['body_mask'].unsqueeze(0).cuda()
-        im_label = images['body_label'].unsqueeze(0).cuda()
-        # agnostic = images['agnostic'].unsqueeze(0).cuda()
-        
-        grid = model(im_label, tc)
-        # grid = model(agnostic, tc)
-        
-        warped_cloth_swap = F.grid_sample(tc, grid, padding_mode='border', align_corners=True)
-        
-        warped_cloth_masked_swap = warped_cloth_swap * im_bm
-        warped_mask_swap = F.grid_sample(tcm, grid, padding_mode='border', align_corners=True)
-        
-        warped_cloth_swap = warped_cloth_swap.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
-        warped_cloth_swap = (warped_cloth_swap * 255).astype(np.uint8)
-        
-        warped_cloth_masked_swap = warped_cloth_masked_swap.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
-        warped_cloth_masked_swap = (warped_cloth_masked_swap * 255).astype(np.uint8)
-        
-        warped_mask_swap = warped_mask_swap.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
-        warped_mask_swap = np.repeat(warped_mask_swap, 3, axis=-1)
-        warped_mask_swap = (warped_mask_swap * 255).astype(np.uint8)
-        
-        # im = Image.fromarray(warped_cloth_swap).save(os.path.join("sample", "bpgm_warp", "warped_cloth_swap.png"))
-        # im = Image.fromarray(warped_cloth_swap).save(os.path.join("sample", "viton_bpgm_warp", images["im_name"]))
-        im = Image.fromarray(warped_cloth_swap).save(os.path.join("tmp.jpg"))
-        break
-        
-        # im = Image.fromarray(warped_cloth_masked_swap).save(os.path.join("sample", "bpgm_warp", "warped_cloth_masked_swap.png"))
-        # im = Image.fromarray(warped_mask_swap).save(os.path.join("sample", "bpgm_warp", "warped_mask_swap.png"))
+            warped_cloth = F.grid_sample(tc, grid, padding_mode='border', align_corners=True)
+            
+            warped_cloth_masked = warped_cloth * im_bm
+            warped_mask = F.grid_sample(tcm, grid, padding_mode='border', align_corners=True)
+            
+            warped_cloth = warped_cloth.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
+            warped_cloth = (warped_cloth * 255).astype(np.uint8)
+            
+            warped_cloth_masked = warped_cloth_masked.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
+            warped_cloth_masked = (warped_cloth_masked * 255).astype(np.uint8)
+            
+            warped_mask = warped_mask.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
+            warped_mask = np.repeat(warped_mask, 3, axis=-1)
+            warped_mask = (warped_mask * 255).astype(np.uint8)
+            
+            # im = Image.fromarray(warped_cloth).save(os.path.join("sample", "bpgm_warp", "warped_cloth.png"))
+            # im = Image.fromarray(warped_cloth_masked).save(os.path.join("sample", "bpgm_warp", "warped_cloth_masked.png"))
+            # im = Image.fromarray(warped_mask).save(os.path.join("sample", "bpgm_warp", "warped_mask.png"))
+            
+            # DEAL WITH SWAP
+            tc = images_swap['target_cloth'].unsqueeze(0)
+            tcm = images_swap['target_cloth_mask'].unsqueeze(0)
+            im_bm = images['body_mask'].unsqueeze(0)
+            im_label = images['body_label'].unsqueeze(0)
+            # agnostic = images['agnostic'].unsqueeze(0).cuda()
+            
+            grid = model(im_label, tc)
+            # grid = model(agnostic, tc)
+            
+            warped_cloth_swap = F.grid_sample(tc, grid, padding_mode='border', align_corners=True)
+            
+            warped_cloth_masked_swap = warped_cloth_swap * im_bm
+            warped_mask_swap = F.grid_sample(tcm, grid, padding_mode='border', align_corners=True)
+            
+            warped_cloth_swap = warped_cloth_swap.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
+            warped_cloth_swap = (warped_cloth_swap * 255).astype(np.uint8)
+            
+            warped_cloth_masked_swap = warped_cloth_masked_swap.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
+            warped_cloth_masked_swap = (warped_cloth_masked_swap * 255).astype(np.uint8)
+            
+            warped_mask_swap = warped_mask_swap.squeeze(0).permute(1, 2, 0).detach().cpu().numpy() / 2 + 0.5
+            warped_mask_swap = np.repeat(warped_mask_swap, 3, axis=-1)
+            warped_mask_swap = (warped_mask_swap * 255).astype(np.uint8)
+            
+            # im = Image.fromarray(warped_cloth_swap).save(os.path.join("sample", "bpgm_warp", "warped_cloth_swap.png"))
+            if not os.path.exists(os.path.join("./sample", "viton_bpgm_warp")):
+                os.makedirs(os.path.join("./sample", "viton_bpgm_warp"))
+            im = Image.fromarray(warped_cloth_swap).save(os.path.join("./sample", "viton_bpgm_warp", images["im_name"]))
+            # im = Image.fromarray(warped_cloth_swap).save(os.path.join("tmp.jpg"))
+            # break
+            
+            # im = Image.fromarray(warped_cloth_masked_swap).save(os.path.join("sample", "bpgm_warp", "warped_cloth_masked_swap.png"))
+            # im = Image.fromarray(warped_mask_swap).save(os.path.join("sample", "bpgm_warp", "warped_mask_swap.png"))
