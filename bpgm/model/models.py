@@ -293,8 +293,8 @@ class BPGM(nn.Module):
         self.extractionB = FeatureExtraction(3, ngf=ngf, n_layers=n_layers, norm_layer=nn.BatchNorm2d)
         self.l2norm = FeatureL2Norm()
         self.correlation = FeatureCorrelation()
-        self.regression = FeatureRegression(input_nc=self.resolution[1], output_dim=2 * opt.grid_size**2, linear_dim=linear_dim, use_cuda=True)
-        self.gridGen = TpsGridGen(*self.resolution, use_cuda=True, grid_size=opt.grid_size)
+        self.regression = FeatureRegression(input_nc=self.resolution[1], output_dim=2 * opt.grid_size**2, linear_dim=linear_dim, use_cuda=False)
+        self.gridGen = TpsGridGen(*self.resolution, use_cuda=False, grid_size=opt.grid_size)
         
     def forward(self, inputA, inputB):
         featureA = self.extractionA(inputA)
