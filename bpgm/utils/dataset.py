@@ -10,6 +10,7 @@ import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
 from PIL import Image, ImageDraw
+import pdb
 
 """
 semantic_labels = [
@@ -346,7 +347,9 @@ class VitonDataset(data.Dataset):
         target_cloth_mask = cv2.bitwise_not(_cm[1:-1, 1:-1])
         
         # load and process the body labels
-        label = cv2.imread(osp.join(self.db_path, "data", "image_densepose_parse", df_row["poseA"].replace(".jpg", ".png")))
+        file_path = osp.join(self.db_path, "data", "image_densepose_parse", df_row["poseA"]).replace("\\", "/")
+        assert osp.exists(file_path), file_path
+        label = cv2.imread(file_path)
         label = cv2.cvtColor(label, cv2.COLOR_BGR2RGB)
         
         label = cv2.resize(label, self.opt.img_size[::-1], interpolation=cv2.INTER_NEAREST)
@@ -360,7 +363,7 @@ class VitonDataset(data.Dataset):
         
         parse_body = label_transf[2, :, :].unsqueeze(0)
         # or (comment this in case segmentations should be cloth-based)
-        _label = cv2.imread(osp.join(self.db_path, "data", "image_parse_with_neck", df_row["poseA"].replace(".jpg", ".png")))
+        _label = cv2.imread(osp.join(self.db_path, "data", "image_parse_with_neck", df_row["poseA"].replace(".jpg", ".png")).replace("\\", "/"))
         _label = cv2.cvtColor(_label, cv2.COLOR_BGR2RGB)
         _label = cv2.resize(_label, self.opt.img_size[::-1], interpolation=cv2.INTER_NEAREST)
         cloth_mask = torch.tensor(np.all(_label == [128, 0, 128], axis=2).astype(np.float32)).unsqueeze(0) * 2 - 1
