@@ -25,6 +25,12 @@ significantly improves on the existing state-of-the-art.
 
 The experiments were conducted on one (for image resolutions 256×192) or two (for image resolution 512×368) NVIDIA RTX 3090 GPUs.
 
+## Testing Only BPGM
+```bash
+cd C-VTON/bpgm
+python test.py --name C-VTON-VITON-HD --dataset viton --datamode test --checkpoint ./checkpoints/bpgm_final_256_26_3_viton.pth --grid_size 3
+```
+
 ## Testing
 
 To avoid setting up this repository only to obtain results presented in the paper, please see the generated test results [here](https://unilj-my.sharepoint.com/:u:/g/personal/ajda_lampe_fri1_uni-lj_si/EUGuq5g2GsVMhr8-SJaJzOsBAv3eV2u5lYHNaVs48jg5rQ?e=rM89CX) (for VITON), [here](https://unilj-my.sharepoint.com/:u:/g/personal/ajda_lampe_fri1_uni-lj_si/EaNy6fTn9J5Ko9gN07CP-JkB99pOlQFzCPCg-YALheCoKA?e=vxYgKm) (for VITON-HD) and [here](https://unilj-my.sharepoint.com/:u:/g/personal/ajda_lampe_fri1_uni-lj_si/EaMvf74Mr79AqNexNF3dsLQBJ7gT2xj0Hu5hoHeCLGTdFg?e=RY3V1n) (for MPV). You can find respective test splits alongside provided preprocessed data [here](https://unilj-my.sharepoint.com/:u:/g/personal/ajda_lampe_fri1_uni-lj_si/ETp4oU8UlJJJmLcAeHe7AAQB8guB7DXsWnrvz1X6wXVhYA?e=fKMFay) (VITON) and [here](https://unilj-my.sharepoint.com/:u:/g/personal/ajda_lampe_fri1_uni-lj_si/EQAaPs8M7BpIlQoTiqKse8wBL0gX8IbXP74jKxg35hNrGw?e=geHFmv) (MPV).
